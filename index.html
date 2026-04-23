@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Suers SPM Objective</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg:#0f0d0a; --surface:#1a1510; --surface2:#241c12; --border:#3a2e1e;
+            --primary:#ff8c42; --primary-dark:#e5721f; --primary-glow:rgba(255,140,66,0.2); --primary-dim:rgba(255,140,66,0.1);
+            --amber:#ffb347; --amber-dim:rgba(255,179,71,0.12); --warm:#ff6b35;
+            --success:#52d98a; --success-dim:rgba(82,217,138,0.12);
+            --error:#ff5252; --error-dim:rgba(255,82,82,0.12);
+            --warning:#ffb347; --warning-dim:rgba(255,179,71,0.15);
+            --text:#f5ede0; --muted:#7a6654; --muted2:#b09880;
+            --font:'Sora',sans-serif; --mono:'JetBrains Mono',monospace;
+        }
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+        body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;overflow-x:hidden;}
+        body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(255,140,66,0.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(255,107,53,0.04) 0%,transparent 50%);pointer-events:none;z-index:0;}
+        #app{width:100%;max-width:520px;min-height:100vh;position:relative;z-index:1;display:flex;flex-direction:column;}
+        .screen{display:none;flex-direction:column;flex:1;padding:24px 20px 40px;animation:slideUp .35s cubic-bezier(.16,1,.3,1);}
+        .screen.active{display:flex;}
+        @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        /* AUTH */
+        .auth-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px;}
+        .auth-logo{text-align:center;margin-bottom:10px;}
+        .auth-logo .logo-main{font-size:28px;font-weight:800;letter-spacing:-1px;color:var(--primary);line-height:1.1;}
+        .auth-logo .logo-sub{font-size:12px;color:var(--muted2);margin-top:5px;letter-spacing:1px;text-transform:uppercase;}
+        .auth-logo .logo-flame{font-size:40px;margin-bottom:8px;}
+        .auth-tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;}
+        .auth-tab{flex:1;padding:10px;text-align:center;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted);border:none;background:none;transition:all .2s;font-family:var(--font);}
+        .auth-tab.active{background:var(--primary);color:white;}
+        .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px;}
+        .auth-field{display:flex;flex-direction:column;gap:6px;}
+        .auth-field label{font-size:13px;color:var(--muted2);font-weight:600;}
+        .auth-input{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;transition:border-color .2s;width:100%;}
+        .auth-input:focus{border-color:var(--primary);}
+        .auth-btn{background:linear-gradient(135deg,var(--primary),var(--warm));color:white;border:none;border-radius:14px;padding:16px;font-family:var(--font);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;width:100%;}
+        .auth-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+        .auth-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+        .auth-err{background:var(--error-dim);border:1px solid var(--error);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--error);display:none;}
+        .auth-ok{background:var(--success-dim);border:1px solid var(--success);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--success);display:none;}
+        /* TOP BAR */
+        .top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0;position:sticky;top:0;z-index:10;background:rgba(15,13,10,.85);backdrop-filter:blur(12px);}
+        .logo{font-size:15px;font-weight:800;color:var(--primary);}
+        .nav-icons{display:flex;gap:8px;align-items:center;}
+        .nav-icon-btn{width:38px;height:38px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--muted2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;}
+        .nav-icon-btn:hover{color:var(--primary);border-color:var(--primary);}
+        .nav-icon-btn .badge{position:absolute;top:-4px;right:-4px;background:var(--error);color:white;font-size:10px;font-weight:700;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+        .user-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 10px;font-size:11px;color:var(--muted2);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;max-width:120px;overflow:hidden;}
+        .user-pill:hover{border-color:var(--error);color:var(--error);}
+        .user-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        /* HOME */
+        .home-hero{margin:24px 0 18px;text-align:center;}
+        .home-hero h1{font-size:30px;font-weight:800;letter-spacing:-1px;color:var(--text);line-height:1.15;margin-bottom:6px;}
+        .home-hero h1 span{color:var(--primary);}
+        .home-hero p{color:var(--muted);font-size:13px;}
+        .daily-card{background:linear-gradient(135deg,#1f1408,#2a1c08);border:1.5px solid var(--primary);border-radius:20px;padding:18px;cursor:pointer;transition:all .25s;margin-bottom:12px;position:relative;overflow:hidden;}
+        .daily-card::after{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:radial-gradient(circle,rgba(255,140,66,.15),transparent);border-radius:50%;}
+        .daily-card:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(255,140,66,.2);}
+        .daily-card-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+        .daily-card-top .icon{font-size:26px;}
+        .daily-card-top h3{font-size:16px;font-weight:700;color:var(--primary);}
+        .daily-card-top p{font-size:12px;color:var(--muted2);}
+        .daily-progress-bar{width:100%;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+        .daily-progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--amber));border-radius:3px;transition:width .5s;}
+        .daily-progress-text{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--muted);font-family:var(--mono);}
+        .daily-done-badge{background:var(--success-dim);border:1px solid var(--success);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--success);font-weight:600;margin-top:10px;display:inline-block;}
+        .lock-banner{background:var(--warning-dim);border:1px solid var(--warning);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+        .lock-banner i{font-size:20px;color:var(--warning);flex-shrink:0;}
+        .lock-banner p{font-size:13px;color:var(--muted2);line-height:1.5;}
+        .lock-banner strong{color:var(--warning);}
+        .stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+        .stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 10px;text-align:center;}
+        .stat-pill .val{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--primary);}
+        .stat-pill .lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+        .subject-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:22px 18px;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:16px;margin-bottom:10px;position:relative;overflow:hidden;}
+        .subject-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;pointer-events:none;border-radius:20px;}
+        .subject-card.science::before{background:linear-gradient(135deg,var(--primary-dim),transparent 60%);}
+        .subject-card.maths::before{background:linear-gradient(135deg,rgba(255,179,71,.08),transparent 60%);}
+        .subject-card:hover{transform:translateY(-3px);border-color:var(--primary);}
+        .subject-card:hover::before{opacity:1;}
+        .subject-card:active{transform:scale(.98);}
+        .subject-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+        .science .subject-icon{background:var(--primary-dim);color:var(--primary);}
+        .maths .subject-icon{background:var(--amber-dim);color:var(--amber);}
+        .subject-info h3{font-size:16px;font-weight:700;margin-bottom:3px;}
+        .subject-info p{font-size:12px;color:var(--muted);}
+        .subject-arrow{color:var(--muted);font-size:15px;margin-left:auto;}
+        /* PAGE HEADER */
+        .page-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;margin-top:8px;}
+        .back-btn{width:40px;height:40px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--muted2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+        .back-btn:hover{color:var(--primary);border-color:var(--primary);}
+        .page-header-text h2{font-size:20px;font-weight:700;}
+        .page-header-text p{font-size:13px;color:var(--muted);margin-top:2px;}
+        /* LEVEL */
+        .level-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+        .level-card:hover{border-color:var(--primary);background:var(--surface2);}
+        .level-card:active{transform:scale(.98);}
+        .level-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+        .lv-f4 .level-icon{background:rgba(255,107,53,.15);color:var(--warm);}
+        .lv-f5 .level-icon{background:rgba(255,179,71,.15);color:var(--amber);}
+        .lv-comp .level-icon{background:var(--primary-dim);color:var(--primary);}
+        .level-card h3{font-size:16px;font-weight:600;flex:1;}
+        .level-card .chev{color:var(--muted);}
+        /* CHAPTERS */
+        .chapter-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 15px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:11px;margin-bottom:8px;}
+        .chapter-card:hover{border-color:var(--primary);}
+        .chapter-card:active{transform:scale(.98);}
+        .chapter-num{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--primary);background:var(--primary-dim);padding:5px 9px;border-radius:8px;flex-shrink:0;}
+        .chapter-info{flex:1;min-width:0;}
+        .chapter-info h4{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .chapter-info p{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .chapter-badge{font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;flex-shrink:0;}
+        .badge-questions{background:var(--surface2);color:var(--muted2);}
+        .badge-done{background:var(--success-dim);color:var(--success);}
+        .badge-comp{background:var(--primary-dim);color:var(--primary);}
+        .chapter-card.comp-chapter{border-color:rgba(255,140,66,.3);background:rgba(255,140,66,.04);}
+        /* QUIZ */
+        .quiz-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+        .quiz-meta{font-size:13px;color:var(--muted);font-family:var(--mono);}
+        .quit-btn{width:36px;height:36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--muted2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+        .prog-track{width:100%;height:4px;background:var(--surface2);border-radius:2px;margin-bottom:18px;overflow:hidden;}
+        .prog-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--amber));border-radius:2px;transition:width .4s cubic-bezier(.16,1,.3,1);}
+        .question-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px 16px 16px;margin-bottom:14px;}
+        .question-card .q-text{font-size:16px;font-weight:600;line-height:1.55;color:var(--text);}
+        .bi-lang{display:block;font-size:13px;font-weight:400;color:var(--muted);font-style:italic;margin-top:5px;}
+        .q-source{display:flex;align-items:center;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:var(--mono);}
+        .options-grid{display:flex;flex-direction:column;gap:9px;}
+        .option-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:13px;padding:13px 15px;font-family:var(--font);font-size:15px;text-align:left;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:12px;color:var(--text);}
+        .option-btn:hover:not(:disabled){border-color:var(--primary);background:var(--primary-dim);}
+        .option-btn:active:not(:disabled){transform:scale(.98);}
+        .option-lbl{width:28px;height:28px;border-radius:8px;background:var(--surface2);color:var(--muted2);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s;}
+        .option-content{flex:1;line-height:1.4;}
+        .option-btn.correct{border-color:var(--success);background:var(--success-dim);}
+        .option-btn.correct .option-lbl{background:var(--success);color:#000;}
+        .option-btn.wrong{border-color:var(--error);background:var(--error-dim);}
+        .option-btn.wrong .option-lbl{background:var(--error);color:#fff;}
+        .option-btn:disabled{cursor:default;}
+        .option-btn:has(.opt-table){flex-direction:column;align-items:flex-start;gap:8px;}
+        .option-btn:has(.opt-table) .option-lbl{align-self:flex-start;}
+        .option-btn:has(.opt-table) .option-content{width:100%;}
+        /* IMG/TABLE */
+        .q-img{width:100%;max-width:280px;border-radius:12px;display:block;margin:14px auto 4px;border:1px solid var(--border);}
+        .q-img-caption{text-align:center;font-size:12px;color:var(--muted);margin-bottom:4px;}
+        .q-statement{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin:12px 0 4px;font-size:14px;color:var(--muted2);line-height:1.65;}
+        .q-statement em{color:var(--text);font-style:italic;}
+        .q-table,.opt-table{width:100%;border-collapse:collapse;margin:10px 0 4px;font-size:12px;border-radius:8px;overflow:hidden;}
+        .q-table th{background:var(--surface2);color:var(--primary);font-weight:700;padding:8px 10px;border:1px solid var(--border);text-align:center;}
+        .q-table td{padding:8px 10px;border:1px solid var(--border);color:var(--muted2);font-size:12px;line-height:1.4;vertical-align:top;text-align:center;}
+        .opt-table th{background:var(--primary-dim);color:var(--primary);font-weight:700;padding:6px 10px;border:1px solid var(--border);text-align:center;font-size:12px;}
+        .opt-table td{padding:5px 10px;border:1px solid var(--border);font-size:12px;text-align:center;color:var(--text);vertical-align:middle;}
+        /* FEEDBACK */
+        .feedback-panel{display:none;margin-top:auto;padding-top:16px;animation:slideUp .3s cubic-bezier(.16,1,.3,1);}
+        .feedback-inner{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;}
+        .feedback-inner.is-correct{border-color:var(--success);}
+        .feedback-inner.is-wrong{border-color:var(--error);}
+        .feedback-title{font-size:15px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+        .feedback-title.correct{color:var(--success);}
+        .feedback-title.wrong{color:var(--error);}
+        .feedback-body{font-size:14px;color:var(--muted2);line-height:1.6;margin-bottom:14px;}
+        .next-btn{width:100%;background:linear-gradient(135deg,var(--primary),var(--warm));color:white;border:none;border-radius:13px;padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+        .next-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+        /* RESULT */
+        .result-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;}
+        .result-ring{width:150px;height:150px;position:relative;}
+        .result-ring svg{transform:rotate(-90deg);}
+        .ring-bg{fill:none;stroke:var(--surface2);stroke-width:10;}
+        .ring-fg{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.16,1,.3,1);}
+        .ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+        .ring-pct{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--primary);}
+        .ring-sub{font-size:12px;color:var(--muted);}
+        .result-msg{font-size:19px;font-weight:700;}
+        .result-detail{font-size:14px;color:var(--muted);}
+        .result-actions{display:flex;flex-direction:column;gap:10px;width:100%;}
+        .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);border-radius:13px;padding:13px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+        .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+        /* WRONG/PROGRESS */
+        .wrong-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;}
+        .wrong-card-q{font-size:13px;font-weight:600;line-height:1.5;margin-bottom:8px;}
+        .wrong-card-row{display:flex;gap:8px;margin-bottom:5px;flex-wrap:wrap;}
+        .wrong-pill{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600;}
+        .pill-wrong{background:var(--error-dim);color:var(--error);}
+        .pill-correct{background:var(--success-dim);color:var(--success);}
+        .wrong-card-exp{font-size:12px;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:8px;margin-top:6px;}
+        .wrong-source{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px;}
+        .clear-btn{width:100%;background:var(--error-dim);border:1px solid var(--error);color:var(--error);border-radius:13px;padding:12px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;margin-top:10px;transition:all .2s;}
+        .clear-btn:hover{background:var(--error);color:white;}
+        .streak-banner{background:linear-gradient(135deg,var(--primary-dim),var(--amber-dim));border:1px solid var(--primary);border-radius:16px;padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+        .streak-fire{font-size:32px;line-height:1;}
+        .streak-info h3{font-size:17px;font-weight:700;color:var(--primary);}
+        .streak-info p{font-size:12px;color:var(--muted2);margin-top:2px;}
+        .streak-done{margin-left:auto;text-align:right;}
+        .streak-done .val{font-size:19px;font-weight:700;font-family:var(--mono);color:var(--amber);}
+        .streak-done .lbl{font-size:11px;color:var(--muted);}
+        .prog-subject-header{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;}
+        .prog-row{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:7px;display:flex;align-items:center;gap:12px;}
+        .prog-row-info{flex:1;min-width:0;}
+        .prog-row-info h4{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .prog-row-info p{font-size:11px;color:var(--muted);margin-top:1px;}
+        .prog-mini-bar{width:55px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;flex-shrink:0;}
+        .prog-mini-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),var(--amber));}
+        .prog-pct{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--primary);width:34px;text-align:right;flex-shrink:0;}
+        .scroll-section{overflow-y:auto;flex:1;}
+        /* ADMIN */
+        .admin-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px;}
+        .admin-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px;text-align:center;}
+        .admin-stat-card .val{font-size:26px;font-weight:700;font-family:var(--mono);color:var(--primary);}
+        .admin-stat-card .lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+        .admin-user-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:13px 15px;margin-bottom:8px;}
+        .admin-user-top{display:flex;align-items:center;gap:10px;}
+        .admin-user-avatar{width:34px;height:34px;border-radius:10px;background:var(--primary-dim);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+        .admin-user-info{flex:1;min-width:0;}
+        .admin-user-info h4{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .admin-user-info p{font-size:11px;color:var(--muted);margin-top:1px;font-family:var(--mono);}
+        .unlock-btn{background:var(--success-dim);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:5px 12px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;flex-shrink:0;}
+        .unlock-btn:hover{background:var(--success);color:#000;}
+        .locked-tag{border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;flex-shrink:0;}
+        /* TOAST */
+        #toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+        .toast{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:30px;font-size:14px;font-weight:500;animation:toastIn .3s ease;white-space:nowrap;pointer-events:auto;}
+        @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @media(max-width:400px){.screen{padding:18px 13px 34px;}.home-hero h1{font-size:26px;}}
+</style>
+</head>
+<body>
+<div id="app">
+    <div id="auth-screen" class="screen active">
+        <div class="auth-wrap">
+            <div class="auth-logo">
+                <div class="logo-flame">🔥</div>
+                <div class="logo-main">Suers SPM Objective</div>
+                <div class="logo-sub">Platform Latihan SPM Online</div>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('login')">Log Masuk</button>
+                <button class="auth-tab" onclick="switchTab('register')">Daftar</button>
+            </div>
+            <div class="auth-card">
+                <div id="auth-error" class="auth-err"></div>
+                <div id="auth-success" class="auth-ok"></div>
+                <div class="auth-field"><label>Email</label><input class="auth-input" id="auth-email" type="email" placeholder="student@email.com"></div>
+                <div class="auth-field"><label>Kata Laluan / Password</label><input class="auth-input" id="auth-password" type="password" placeholder="Min. 6 aksara"></div>
+                <div class="auth-field" id="name-field" style="display:none"><label>Nama / Name</label><input class="auth-input" id="auth-name" type="text" placeholder="Nama penuh anda"></div>
+                <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">Log Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="top-bar" id="global-top-bar" style="display:none">
+        <span class="logo">🔥 Suers SPM</span>
+        <div class="nav-icons">
+            <button class="nav-icon-btn" onclick="showWrong()" title="Buku Salah"><i class="fa-solid fa-bookmark"></i><span class="badge" id="wrong-badge" style="display:none">0</span></button>
+            <button class="nav-icon-btn" onclick="showProgress()" title="Kemajuan"><i class="fa-solid fa-chart-simple"></i></button>
+            <button class="nav-icon-btn" id="admin-btn" onclick="showAdmin()" title="Admin" style="display:none"><i class="fa-solid fa-shield-halved"></i></button>
+            <button class="user-pill" onclick="handleLogout()"><i class="fa-solid fa-user" style="font-size:10px;flex-shrink:0"></i><span id="user-name-display">...</span><i class="fa-solid fa-right-from-bracket" style="font-size:10px;flex-shrink:0"></i></button>
+        </div>
+    </div>
+
+    <div id="home-screen" class="screen">
+        <div class="home-hero"><h1>Latih Diri,<br><span>Kuasai SPM!</span></h1><p>Pilih subjek atau mulakan Daily Quiz</p></div>
+        <div class="daily-card" onclick="startDailyQuiz()" id="daily-card">
+            <div class="daily-card-top"><div class="icon">📅</div><div><h3>Daily Quiz</h3><p>Cabaran harian 10 soalan</p></div></div>
+            <div class="daily-progress-bar"><div class="daily-progress-fill" id="daily-prog-fill" style="width:0%"></div></div>
+            <div class="daily-progress-text"><span id="daily-prog-text">0 / 10 soalan hari ini</span><span id="daily-streak-text">🔥 0 hari</span></div>
+        </div>
+        <div class="lock-banner" id="lock-banner" style="display:none">
+            <i class="fa-solid fa-lock"></i>
+            <p>Anda telah melebihi <strong>5 sesi latihan</strong>. Sila hubungi guru untuk membuka akses penuh. Daily Quiz masih tersedia!</p>
+        </div>
+        <div class="stats-strip">
+            <div class="stat-pill"><div class="val" id="stat-done">0</div><div class="lbl">Soalan Dijawab</div></div>
+            <div class="stat-pill"><div class="val" id="stat-acc">—</div><div class="lbl">Ketepatan</div></div>
+            <div class="stat-pill"><div class="val" id="stat-wrong">0</div><div class="lbl">Soalan Salah</div></div>
+        </div>
+        <div class="subject-card science" onclick="goSubject('science')"><div class="subject-icon"><i class="fa-solid fa-flask"></i></div><div class="subject-info"><h3>Sains (科学)</h3><p>F4 · F5 · SPM</p></div><i class="fa-solid fa-chevron-right subject-arrow"></i></div>
+        <div class="subject-card maths" onclick="goSubject('maths')"><div class="subject-icon"><i class="fa-solid fa-calculator"></i></div><div class="subject-info"><h3>Matematik (数学)</h3><p>F4 · F5 · SPM</p></div><i class="fa-solid fa-chevron-right subject-arrow"></i></div>
+    </div>
+
+    <div id="level-screen" class="screen">
+        <div class="page-header"><button class="back-btn" onclick="showScreen('home-screen')"><i class="fa-solid fa-arrow-left"></i></button><div class="page-header-text"><h2 id="level-title">Sains</h2><p>Pilih tingkatan</p></div></div>
+        <div class="level-card lv-f4" onclick="showChapters('f4')"><div class="level-icon"><i class="fa-solid fa-4"></i></div><h3>Tingkatan 4 (F4)</h3><i class="fa-solid fa-chevron-right chev"></i></div>
+        <div class="level-card lv-f5" onclick="showChapters('f5')"><div class="level-icon"><i class="fa-solid fa-5"></i></div><h3>Tingkatan 5 (F5)</h3><i class="fa-solid fa-chevron-right chev"></i></div>
+        <div class="level-card lv-comp" onclick="showChapters('comp')"><div class="level-icon"><i class="fa-solid fa-layer-group"></i></div><h3>Komprenhensif (综合)</h3><i class="fa-solid fa-chevron-right chev"></i></div>
+    </div>
+
+    <div id="chapter-screen" class="screen">
+        <div class="page-header"><button class="back-btn" onclick="showScreen('level-screen')"><i class="fa-solid fa-arrow-left"></i></button><div class="page-header-text"><h2 id="chapter-title">Senarai Bab</h2><p>Pilih bab untuk berlatih</p></div></div>
+        <div class="scroll-section" id="chapter-list"></div>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-topbar"><div class="quiz-meta" id="quiz-meta">1 / 10</div><button class="quit-btn" onclick="quitQuiz()"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+        <div class="question-card"><div class="q-text" id="q-text"></div><div class="q-source" id="q-source" style="display:none"><i class="fa-solid fa-tag"></i><span id="q-source-text"></span></div></div>
+        <div class="options-grid" id="options-grid"></div>
+        <div class="feedback-panel" id="feedback-panel">
+            <div class="feedback-inner" id="feedback-inner">
+                <div class="feedback-title" id="fb-title"></div>
+                <div class="feedback-body" id="fb-body"></div>
+                <button class="next-btn" id="next-btn" onclick="nextQ()">Soalan Seterusnya →</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <div class="page-header"><button class="back-btn" onclick="showScreen('home-screen')"><i class="fa-solid fa-arrow-left"></i></button><div class="page-header-text"><h2>Tamat! 🎉</h2><p>Keputusan latihan anda</p></div></div>
+        <div class="result-wrap">
+            <div class="result-ring">
+                <svg width="150" height="150" viewBox="0 0 150 150">
+                    <circle class="ring-bg" cx="75" cy="75" r="63"/>
+                    <circle class="ring-fg" id="ring-fg" cx="75" cy="75" r="63" stroke="url(#rg2)" stroke-dasharray="396" stroke-dashoffset="396"/>
+                    <defs><linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff8c42"/><stop offset="100%" stop-color="#ffb347"/></linearGradient></defs>
+                </svg>
+                <div class="ring-text"><div class="ring-pct" id="ring-pct">0%</div><div class="ring-sub">Ketepatan</div></div>
+            </div>
+            <div><div class="result-msg" id="result-msg">Bagus!</div><div class="result-detail" id="result-detail"></div></div>
+            <div id="daily-complete-badge" style="display:none" class="daily-done-badge">✅ Daily Quiz hari ini selesai! +1 hari streak</div>
+            <div class="result-actions" style="width:100%">
+                <button class="next-btn" onclick="retryQuiz()">🔄 Cuba Lagi</button>
+                <button class="btn-outline" onclick="showScreen('home-screen')">Kembali ke Utama</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="wrong-screen" class="screen">
+        <div class="page-header"><button class="back-btn" onclick="showScreen('home-screen')"><i class="fa-solid fa-arrow-left"></i></button><div class="page-header-text"><h2>Buku Soalan Salah</h2><p>错题本</p></div></div>
+        <div class="scroll-section" id="wrong-list"></div>
+    </div>
+
+    <div id="progress-screen" class="screen">
+        <div class="page-header"><button class="back-btn" onclick="showScreen('home-screen')"><i class="fa-solid fa-arrow-left"></i></button><div class="page-header-text"><h2>Kemajuan Saya</h2><p>学习进度</p></div></div>
+        <div class="scroll-section" id="progress-list"></div>
+    </div>
+
+    <div id="admin-screen" class="screen">
+        <div class="page-header"><button class="back-btn" onclick="showScreen('home-screen')"><i class="fa-solid fa-arrow-left"></i></button><div class="page-header-text"><h2>🛡️ Admin Panel</h2><p>Pengurusan pelajar</p></div></div>
+        <div id="admin-stats-strip" class="admin-stat-grid"></div>
+        <div class="prog-subject-header">Senarai Pelajar</div>
+        <div class="scroll-section" id="admin-user-list"><div style="text-align:center;padding:30px;color:var(--muted)"><span class="spinner"></span></div></div>
+    </div>
+</div>
+<div id="toast-container"></div>
+<script>
+
+const SUPABASE_URL = 'https://hopnaljxdyfuzskibofb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_YsTkQsNzgKCW78itxkCq7Q_Vn37t-ZB';
+const ADMIN_EMAIL  = 'shiting961106@gmail.com';
+const FREE_SESSION_LIMIT = 5;
+const QUIZ_SIZE = 10;
+
+async function sbFetch(path, opts={}) {
+    const res = await fetch(SUPABASE_URL + path, {
+        ...opts,
+        headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + (state.accessToken || SUPABASE_KEY),
+            'Content-Type': 'application/json',
+            'Prefer': opts.prefer || '',
+            ...(opts.headers||{})
+        }
+    });
+    const text = await res.text();
+    try { return { ok: res.ok, data: JSON.parse(text), status: res.status }; }
+    catch { return { ok: res.ok, data: text, status: res.status }; }
+}
+async function authFetch(path, body) {
+    const res = await fetch(SUPABASE_URL + '/auth/v1' + path, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    return await res.json();
+}
+
+const APP_DATA = {
+    science: {
+        name: '科学 (Sains)',
+        f4: { title: 'Tingkatan 4', chapters: [
+            { id:'s_f4_b1',  name:'Bab 1',  desc:'Langkah Keselamatan dalam Makmal' },
+            { id:'s_f4_b2',  name:'Bab 2',  desc:'Bantuan Kecemasan' },
+            { id:'s_f4_b3',  name:'Bab 3',  desc:'Teknik Mengukur Parameter Kesihatan' },
+            { id:'s_f4_b4',  name:'Bab 4',  desc:'Teknologi Hijau dalam Melestarikan Alam' },
+            { id:'s_f4_b5',  name:'Bab 5',  desc:'Genetik' },
+            { id:'s_f4_b6',  name:'Bab 6',  desc:'Sokongan, Pergerakan dan Pertumbuhan' },
+            { id:'s_f4_b7',  name:'Bab 7',  desc:'Koordinasi Badan' },
+            { id:'s_f4_b8',  name:'Bab 8',  desc:'Unsur dan Bahan' },
+            { id:'s_f4_b9',  name:'Bab 9',  desc:'Kimia Industri' },
+            { id:'s_f4_b10', name:'Bab 10', desc:'Kimia dalam Perubatan dan Kesihatan' },
+            { id:'s_f4_b11', name:'Bab 11', desc:'Daya dan Gerakan' },
+            { id:'s_f4_b12', name:'Bab 12', desc:'Tenaga Nuklear' },
+        ]},
+        f5: { title: 'Tingkatan 5', chapters: [
+            { id:'s_f5_b1', name:'Bab 1', desc:'Mikroorganisma' },
+            { id:'s_f5_b2', name:'Bab 2', desc:'Nutrisi dan Teknologi Makanan' },
+            { id:'s_f5_b3', name:'Bab 3', desc:'Kelestarian Alam Sekitar' },
+            { id:'s_f5_b4', name:'Bab 4', desc:'Kadar Tindak Balas' },
+            { id:'s_f5_b5', name:'Bab 5', desc:'Sebatian Karbon' },
+            { id:'s_f5_b6', name:'Bab 6', desc:'Elektrokimia' },
+            { id:'s_f5_b7', name:'Bab 7', desc:'Cahaya dan Optik' },
+            { id:'s_f5_b8', name:'Bab 8', desc:'Daya dan Tekanan' },
+            { id:'s_f5_b9', name:'Bab 9', desc:'Teknologi Angkasa Lepas' },
+        ]},
+        comp: { title: '综合测试', chapters: [
+            { id:'s_comp_f4',  name:'F4 综合', desc:'所有 F4 章节题目', isComp:true },
+            { id:'s_comp_f5',  name:'F5 综合', desc:'所有 F5 章节题目', isComp:true },
+            { id:'s_comp_all', name:'F4+F5 综合', desc:'完整 SPM 模拟', isComp:true },
+        ]}
+    },
+    maths: {
+        name: '数学 (Matematik)',
+        f4:   { title:'Tingkatan 4', chapters:[] },
+        f5:   { title:'Tingkatan 5', chapters:[] },
+        comp: { title:'综合测试',    chapters:[] }
+    }
+};
+
+const DB = {
+    // ===================== FORM 4 =====================
+
+    // Bab 1: Langkah Keselamatan dalam Makmal
+    s_f4_b1: [
+        { q:"1. Apakah langkah pertama yang perlu dilakukan sekiranya asid hidroklorik pekat tumpah di atas lantai makmal? | What is the first step to be taken if concentrated hydrochloric acid spill on the laboratory floor?", opts:["Memberitahu guru | Inform the teacher","Menghubungi Jabatan Bomba | Call the Fire Department","Mengajak rakan-rakan keluar dari makmal | Ask friends to go out from laboratory","Menabur pasir di atas kawasan tumpahan | Sprinkle sand onto the spillage area"], ans:0, exp:"Tindakan pertama jika berlaku tumpahan bahan kimia adalah segera melaporkannya kepada guru. | The first action for a chemical spill is to report it to the teacher immediately. (发生化学品泄漏时，第一步永远是立即向老师报告。)", src:"Kedah SPM Trial 2025 - Soalan 1" }
+    ],
+
+    // Bab 2: Bantuan Kecemasan
+    s_f4_b2: [
+        { q:"2. Mengapakah kulit dan bibir mangsa yang tercekik berwarna kebiruan dan kehitaman? | Why are the skin and lips of the suffocated victim bluish and blackish?", opts:["Saluran pernafasan mangsa tersekat dengan bendasing | The victim's airway is blocked by a foreign object","Mangsa menyedut lebih banyak gas karbon dioksida | The victim inhales more carbon dioxide gas","Oksigen kurang dalam darah | Less oxygen in the blood","Mangsa sukar bernafas | The victim has difficulty in breathing"], ans:2, exp:"Keadaan kebiruan (Sianosis) berlaku apabila oksigen kurang dalam darah. | Cyanosis occurs due to lack of oxygen in the blood. (发绀是由于血液中氧气不足引起皮肤发蓝。)", src:"Kedah SPM Trial 2025 - Soalan 2" }
+    ],
+
+    // Bab 3: Teknik Mengukur Parameter Kesihatan Badan
+    s_f4_b3: [
+        { q:"3. Rajah menunjukkan sejenis termometer berbentuk pistol (tidak sentuh kulit). Apakah jenis termometer tersebut? | Diagram shows a gun-shaped contactless thermometer. What is the type?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">3. Rajah 1 menunjukkan sejenis termometer.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 1 shows a type of thermometer.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_001.png"/><p class="q-img-caption">Rajah 1 / Diagram 1</p><br><br><span style="font-size:15px;font-weight:600">Apakah jenis termometer tersebut?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What is the type of the thermometer?</em></span>`, opts:["Termometer klinik | Clinical thermometer","Termometer rektal | Rectal thermometer","Termometer makmal | Laboratory thermometer","Termometer inframerah | Infrared thermometer"], ans:3, exp:"Termometer berbentuk pistol yang tidak sentuh kulit adalah Termometer Inframerah. | A gun-shaped contactless thermometer is an Infrared thermometer. (枪形非接触式温度计就是红外线体温计。)", src:"Kedah SPM Trial 2025 - Soalan 3" },
+        { q:"4. Rajah 2 menunjukkan bacaan tekanan darah seorang lelaki dewasa. | Diagram 2 shows the blood pressure reading of a man.", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">4. Rajah 2 menunjukkan bacaan tekanan darah seorang lelaki dewasa.<br><em style="font-size:14px;font-weight:400;color:var(--muted)">Diagram 2 shows the blood pressure reading of a man.</em></span><img class="q-img" src="imgs/img_002.png"/><p class="q-img-caption">Rajah 2 / Diagram 2</p><br><span style="font-size:16px;font-weight:600">Apakah penyakit yang mungkin dihidapi oleh lelaki dewasa itu?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What disease that might be suffered by the man?</em></span>`, opts:["Anemia | Anemia","Diabetes melitus | Diabetes mellitus","Tekanan darah tinggi | High blood pressure","Tekanan darah rendah | Low blood pressure"], ans:3, exp:"Bacaan tekanan darah normal ialah 120/80 mmHg. Bacaan 86/60 adalah sangat rendah, menunjukkan Hipotensi (tekanan darah rendah). | Normal BP is 120/80 mmHg. A reading of 86/60 indicates Hypotension (low blood pressure). (正常血压为120/80。86/60的读数表示低血压（低于正常范围）。)", src:"Kedah SPM Trial 2025 - Soalan 4" }
+    ],
+
+    // Bab 4: Teknologi Hijau dalam Melestarikan Alam
+    s_f4_b4: [
+        { q:"5. Antara yang berikut, yang manakah merupakan isu sosiosaintifik dalam sektor tenaga? | Which of the following is a socioscientific issue in the energy sector?", opts:["Penguraian sisa pepejal | Decomposition of solid waste","Pembakaran hutan | Forest burning","Kesusutan bahan api fosil | Depletion of fossil fuels","Pembebasan asap kenderaan bermotor | Release of motor vehicle fumes"], ans:2, exp:"Isu sosiosaintifik dalam sektor tenaga ialah berkaitan sumber tenaga. Kesusutan bahan api fosil menjejaskan bekalan tenaga global. | Depletion of fossil fuels is the key socioscientific issue in energy sector. (化石燃料的枯竭是能源领域最核心的社会科学议题，直接影响全球能源供应。)", src:"Kedah SPM Trial 2025 - Soalan 5" },
+        { q:"6. Kaji pernyataan berikut. | Study the following statement.", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">6. Kaji pernyataan berikut.<br><em style="font-size:14px;font-weight:400;color:var(--muted)">Study the following statement.</em></span><div class="q-statement">Kira-kira 268 juta tan kertas dihasilkan setahun.<br>Kertas menjadi penyumbang utama sisa pepejal.<br><br><em>About 268 million tons of paper are produced per year.<br>Paper is the main contributor to solid waste.</em></div><br><span style="font-size:15px;font-weight:600">Apakah yang boleh dilakukan untuk menangani isu tersebut?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What can be done to overcome the issue?</em></span>`, opts:["Menggunakan kertas sebagai bahan api | Using papers as fuel","Menggunakan kertas apabila diperlukan sahaja | Using papers only when needed","Menanam lebih banyak pokok untuk menghasilkan kertas | Plant more trees to produce papers","Menyimpan semua kertas yang tidak digunakan di dalam stor | Keep all unused papers in the store"], ans:1, exp:"Cara terbaik mengurangkan sisa pepejal kertas ialah menggunakan kertas hanya apabila perlu (prinsip Kurangkan/Reduce). | Best way to reduce paper solid waste is to use paper only when necessary (Reduce principle). (减少纸张浪费最好的方法是按需使用——减量原则。)", src:"Kedah SPM Trial 2025 - Soalan 6" },
+        { q:"7. 'Hutan merupakan peparu Bumi / Forests are the lungs of the Earth'. Antara yang berikut, yang manakah menjejaskan peranan hutan seperti pernyataan di atas? | Which of the following affects the role of forests as stated?", opts:["Penggunaan sumber bahan api fosil untuk kenderaan bermotor | Use of fossil fuel resources for motor vehicles","Pencemaran air akibat dari pembuangan bahan kimia | Water pollution due to chemical dumping","Penggunaan baja kimia berlebihan dalam pertanian | Excessive use of chemical fertilisers in agriculture","Penerokaan hutan yang berleluasa | Widespread deforestation"], ans:3, exp:"Penerokaan hutan secara besar-besaran (penebangan hutan) secara langsung mengurangkan keupayaan hutan menyerap CO2, menjejaskan peranannya sebagai peparu Bumi. | Widespread deforestation directly reduces forests' ability to absorb CO2, affecting their role as Earth's lungs. (大规模毁林直接削弱森林吸收CO2的能力，破坏其'地球之肺'的功能。)", src:"Kedah SPM Trial 2025 - Soalan 7" }
+    ],
+
+    // Bab 5: Genetik
+    s_f4_b5: [
+        { q:"8. Apakah kepentingan pembahagian sel kepada organisma hidup? | What is the importance of cell division to living organism?", opts:["Menghasilkan lebih banyak antibodi | Produce more antibodies","Membantu penyerapan nutrien dalam usus | Help absorb nutrients in the intestine","Membantu pertumbuhan dan pembaikan tisu | Help tissue growth and repair","Menghasilkan tenaga dalam proses tumbesaran | Produce energy in the growth process"], ans:2, exp:"Pembahagian sel (Mitosis) penting untuk pertumbuhan organisma dan membaiki tisu yang rosak. | Cell division (Mitosis) is essential for growth and tissue repair. (有丝分裂对于生物体的生长以及受损组织的修复至关重要。)", src:"Kedah SPM Trial 2025 - Soalan 8" },
+        { q:"9. Rajah menunjukkan kacukan dua pokok kacang pea berbaka tulen: tinggi (TT) dan kerdil (tt). Apakah genotip anak bagi kacukan tersebut? | Cross of pure-breeding tall (TT) and dwarf (tt) pea plants. What are the genotypes for the offspring?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">9. Rajah 3 menunjukkan rajah skema pewarisan bagi kacukan dua pokok kacang pea.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 3 shows the inheritance scheme diagram of crossing for two pea plants.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_003.png"/><p class="q-img-caption">Rajah 3 / Diagram 3</p><br><br><span style="font-size:15px;font-weight:600">Apakah genotip anak bagi kacukan tersebut?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What are the genotypes for the offspring of the breed?</em></span>`, opts:["Tt, tt, tt dan tt","Tt, Tt, tt dan tt","Tt, Tt, Tt dan tt","Tt, Tt, Tt dan Tt"], ans:3, exp:"Kacukan TT x tt: setiap gamet T bertemu t, menghasilkan 100% anak bergenotip Tt. | TT x tt cross gives 100% Tt offspring. (TT x tt杂交：每个T配子与t配子结合，后代100%为Tt杂合子。)", src:"Kedah SPM Trial 2025 - Soalan 9" },
+        { q:"10. Rajah menunjukkan kariotip seorang individu dengan 47 kromosom (susunan kromosom seks: XXY). Antara yang berikut, yang manakah ciri individu tersebut? | Karyotype shows 47 chromosomes with XXY sex chromosomes. Which characteristic applies?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">10. Rajah 4 menunjukkan kariotip seorang individu.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 4 shows the karyotype of an individual.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_004.png"/><p class="q-img-caption">Rajah 4 / Diagram 4</p><br><br><span style="font-size:15px;font-weight:600">Antara yang berikut, yang manakah ciri individu tersebut?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Which of the following is the characteristic of the individual?</em></span>`, opts:["Mandul | Sterile","Testis yang kecil | Small testis","Kerencatan fizikal dan mental | Physical and mental retardation","Tiada perkembangan ciri-ciri seks sekunder | No development of secondary sexual characteristics"], ans:1, exp:"Kariotip 47 kromosom dengan susunan XXY adalah ciri Sindrom Klinefelter. Ciri utamanya ialah testis yang kecil (hypogonadism). | A 47,XXY karyotype indicates Klinefelter Syndrome. Main feature is small testes (hypogonadism). (47,XXY核型是克氏综合征的特征，主要表现为睾丸发育不全（小睾丸）。)", src:"Kedah SPM Trial 2025 - Soalan 10" }
+    ],
+
+    // Bab 6: Sokongan, Pergerakan dan Pertumbuhan
+    s_f4_b6: [
+        { q:"11. Rajah menunjukkan suatu rangka apendaj. Y menunjuk kepada tulang di bahagian lengan atas yang bersambung dengan bahu. Apakah Y? | Diagram shows appendicular skeleton. Y points to upper arm bone connected to shoulder. What is Y?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">11. Rajah 5 menunjukkan suatu rangka apendaj.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 5 shows an appendicular skeleton.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_005.png"/><p class="q-img-caption">Rajah 5 / Diagram 5</p><br><br><span style="font-size:15px;font-weight:600">Apakah Y? / What is Y?<br><em style="font-size:13px;font-weight:400;color:var(--muted)"></em></span>`, opts:["Metakarpus | Metacarpus","Humerus | Humerus","Radius | Radius","Ulna | Ulna"], ans:1, exp:"Tulang lengan atas yang bersendi dengan bahu (skapula) ialah Humerus. | The upper arm bone that articulates with the shoulder (scapula) is the Humerus. (与肩胛骨相连的上臂骨是肱骨（Humerus）。)", src:"Kedah SPM Trial 2025 - Soalan 11" },
+        { q:"12. Peringkat pertumbuhan manusia yang manakah merupakan pertumbuhan minimum? | Which stage of human growth is the minimum growth?", opts:["Dewasa | Adulthood","Remaja | Adolescence","Bayi | Infancy","Tua | Old age"], ans:3, exp:"Pertumbuhan manusia adalah paling rendah pada peringkat Tua kerana sel-sel badan mula merosot dan kadar pembahagian sel berkurang. | Human growth is slowest in Old Age as cells deteriorate and division rate decreases. (人类在老年期生长速度最慢，因为细胞开始退化，分裂速率下降。)", src:"Kedah SPM Trial 2025 - Soalan 12" },
+        { q:"13. Rajah menunjukkan dua individu dengan ketidakseimbangan hormon: seorang sangat tinggi dan seorang sangat pendek. Apakah hormon tersebut? | Diagram shows two individuals with hormonal imbalance (one very tall, one very short). What is the hormone?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">13. Rajah 6 menunjukkan dua individu yang mengalami ketidakseimbangan hormon.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 6 shows two individuals suffer hormonal imbalance.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_006.png"/><p class="q-img-caption">Rajah 6 / Diagram 6</p><br><br><span style="font-size:15px;font-weight:600">Apakah hormon tersebut?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What is the hormone?</em></span>`, opts:["Adrenalina | Adrenaline","Testosteron | Testosterone","Hormon antidiuresis | Antidiuretic hormone","Hormon pertumbuhan | Growth hormone"], ans:3, exp:"Hormon Pertumbuhan (Growth Hormone) dari pituitari mengawal kadar pertumbuhan. Lebihan menyebabkan gigantisme; kekurangan menyebabkan kerdil. | Growth Hormone from pituitary controls growth rate. Excess causes gigantism; deficiency causes dwarfism. (垂体分泌的生长激素控制生长速率，过多导致巨人症，不足导致侏儒症。)", src:"Kedah SPM Trial 2025 - Soalan 13" }
+    ],
+
+    // Bab 7: Koordinasi Badan
+    s_f4_b7: [
+        { q:"14. Dadah R mengubah laluan impuls di dalam otak dan menyebabkan terdengar suara-suara dan terlihat objek yang tidak wujud. Apakah contoh dadah R? | Drug R changes path of impulses in brain, causes hearing voices and seeing non-existent objects. What is drug R?", opts:["Amfetamina | Amphetamine","Barbiturat | Barbiturate","Ketamin | Ketamine","Kafeina | Caffeine"], ans:2, exp:"Gejala halusinasi (terdengar suara, terlihat objek tidak wujud) adalah kesan dadah halusinogen. Ketamin ialah contoh dadah halusinogen. | Hallucinations are caused by hallucinogenic drugs. Ketamine is a hallucinogen. (听到幻音、看到不存在物体是致幻剂的效果，氯胺酮是典型的致幻剂。)", src:"Kedah SPM Trial 2025 - Soalan 14" }
+    ],
+
+    // Bab 8: Unsur dan Bahan
+    s_f4_b8: [
+        { q:"15. Atom Z mempunyai susunan elektron 2,8,6 (6 elektron di petala terluar). Bagaimanakah atom Z mencapai susunan elektron oktet yang stabil? | Atom Z has electron arrangement 2,8,6. How does atom Z achieve a stable octet?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">15. Rajah 7 menunjukkan susunan atom Z.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 7 shows the arrangement of atom Z.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_007.png"/><p class="q-img-caption">Rajah 7 / Diagram 7</p><br><br><span style="font-size:15px;font-weight:600">Bagaimanakah atom Z mencapai susunan elektron oktet yang stabil?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">How atom Z achieves a stable octet electron arrangement?</em></span>`, opts:["Menerima dua elektron | Accepts two electrons","Menderma dua elektron | Donates two electrons","Menerima enam elektron | Accepts six electrons","Menderma enam elektron | Donates six electrons"], ans:0, exp:"Atom Z mempunyai 6 elektron di petala terluar. Ia perlu menerima 2 elektron lagi untuk mencapai 8 (oktet stabil). | Atom Z has 6 valence electrons. It needs to accept 2 more electrons to achieve octet (8). (Z原子最外层有6个电子，需要再接受2个电子才能达到稳定的八隅体。)", src:"Kedah SPM Trial 2025 - Soalan 15" },
+        { q:"16. Rajah menunjukkan kegunaan isotop M dalam bidang Pertanian dan Arkeologi/Geologi. Apakah M? | Diagram shows isotope M used in Agriculture and Archaeology/Geology. What is M?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">16. Rajah 8 menunjukkan kegunaan isotop M dalam dua bidang.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 8 shows the uses of isotope M in two fields.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_008.png"/><p class="q-img-caption">Rajah 8 / Diagram 8</p><br><br><span style="font-size:15px;font-weight:600">Apakah M? / What is M?<br><em style="font-size:13px;font-weight:400;color:var(--muted)"></em></span>`, opts:["Iodin-131 | Iodine-131","Kobalt-60 | Cobalt-60","Karbon-14 | Carbon-14","Fosforus-32 | Phosphorus-32"], ans:2, exp:"Karbon-14 digunakan dalam penanggalan radiokarbon (arkeologi/geologi) dan sebagai penunjuk dalam kajian penyerapan nutrien tumbuhan (pertanian). | Carbon-14 is used in radiocarbon dating (archaeology/geology) and as a tracer in plant nutrient studies (agriculture). (碳-14用于放射性碳定年法（考古/地质）以及追踪植物养分吸收（农业）。)", src:"Kedah SPM Trial 2025 - Soalan 16" }
+    ],
+
+    // Bab 9: Kimia Industri
+    s_f4_b9: [
+        { q:"18. Mengapakah prisma kaca diperbuat daripada kaca plumbum? | Why is glass prism made of lead glass?", opts:["Tahan terhadap haba | Resistant to heat","Lebih mudah dibentuk | Easy to shape","Lengai terhadap bahan kimia | Chemically inert","Mempunyai indeks biasan yang tinggi | Has high refractive index"], ans:3, exp:"Kaca plumbum mempunyai indeks biasan yang tinggi, membolehkan pemisahan cahaya (spektrum) yang lebih berkesan dalam prisma. | Lead glass has a high refractive index, enabling more effective light dispersion in prisms. (铅玻璃折射率高，能使光在棱镜中产生更有效的色散。)", src:"Kedah SPM Trial 2025 - Soalan 18" }
+    ],
+
+    // Bab 10: Kimia dalam Perubatan dan Kesihatan
+    s_f4_b10: [
+        { q:"19. Rajah menunjukkan sebatang rokok yang menghasilkan molekul X. Apakah kesan utama tindakan molekul X ke atas sel badan? | Diagram shows cigarette producing molecule X (carcinogen). What is the main effect of molecule X on body cells?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">19. Rajah 10 menunjukkan satu sumber yang menghasilkan molekul X.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 10 shows a source producing molecules X.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_009.png"/><p class="q-img-caption">Rajah 10 / Diagram 10</p><br><br><span style="font-size:15px;font-weight:600">Apakah kesan utama tindakan molekul X ke atas sel badan?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What is the main effect of the action of molecules X on body cells?</em></span>`, opts:["Membantu sel darah mengangkut oksigen dengan lebih efisien | Help blood cells transport oxygen efficiently","Meningkatkan penghasilan tenaga | Increase energy production","Mengubah struktur DNA | Change DNA structures","Menyembuhkan luka | Heal wounds"], ans:2, exp:"Molekul X ialah bahan karsinogen dalam rokok. Ia mengubah/merosakkan struktur DNA, menyebabkan sel tumbuh secara tidak terkawal (kanser). | Molecule X is a carcinogen. It alters DNA structure, causing uncontrolled cell growth (cancer). (X分子是香烟中的致癌物，它改变DNA结构，导致细胞不受控制地生长（癌症）。)", src:"Kedah SPM Trial 2025 - Soalan 19" }
+    ],
+
+    // Bab 11: Daya dan Gerakan
+    s_f4_b11: [
+        { q:"17. Rajah menunjukkan keadaan paku yang bengkok selepas diketuk dengan penukul. Apakah langkah untuk mengatasi masalah ini? | Diagram shows a nail bent after being hit. What is the step to overcome this problem?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">17. Rajah 9 menunjukkan keadaan paku selepas diketuk dengan penukul.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 9 shows the condition of the nail after being hit with a hammer.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_010.png"/><p class="q-img-caption">Rajah 9 / Diagram 9</p><br><br><span style="font-size:15px;font-weight:600">Apakah langkah untuk mengatasi masalah ini?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What is the step to overcome this problem?</em></span>`, opts:["Gerudi paku dengan cepat | Drill the nail quickly","Ketuk paku dengan perlahan | Hit the nail gently","Ganti dengan paku keluli | Replace with steel nail","Guna paku yang lebih pendek | Use shorter nail"], ans:3, exp:"Paku bengkok apabila daya ketukan melebihi had elastiknya. Menggunakan paku lebih pendek mengurangkan momen lenturan dan mencegah bengkok. | Nail bends when hitting force exceeds elastic limit. Shorter nail reduces bending moment. (钉子弯曲是因为锤击力超过弹性极限。使用较短的钉子可以减小弯矩。)", src:"Kedah SPM Trial 2025 - Soalan 17" },
+        { q:"21. Sebuah kereta bergerak sejauh 150 meter dalam masa 30 saat. Apakah halaju kereta tersebut? | A car travels 150 meters in 30 seconds. What is the velocity? [Halaju = Sesaran / Masa]", opts:["0.2 m/s","5 m/s","120 m/s","180 m/s"], ans:1, exp:"Halaju = Sesaran / Masa = 150 m / 30 s = 5 m/s. | Velocity = Displacement / Time = 150 / 30 = 5 m/s. (速度 = 位移 / 时间 = 150 / 30 = 5 m/s。)", src:"Kedah SPM Trial 2025 - Soalan 21" },
+                { q:"22. Suatu eksperimen dijalankan dengan menjatuhkan sekeping duit syiling dan sehelai bulu ayam di dalam dua tiub silinder yang berbeza.", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">22. Suatu eksperimen dijalankan dengan menjatuhkan sekeping duit syiling dan sehelai bulu ayam di dalam dua tiub silinder yang berbeza.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">An experiment was conducted by dropping a coin and a piece of chicken feather into two different cylinder tubes.</em></span><br><br><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_011.png"/><br><span style="font-size:15px;font-weight:600">Antara yang berikut, yang manakah menerangkan faktor yang mempengaruhi keputusan tersebut?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Which of the following describes the factors that affect the results?</em></span>`, htmlOpts:[`<table class="opt-table"><thead><tr><th>P</th><th>Q</th></tr></thead><tbody><tr><td>Tiada rintangan udara<br><em>No air resistance</em></td><td>Ada rintangan udara<br><em>There is air resistance</em></td></tr></tbody></table>`,`<table class="opt-table"><thead><tr><th>P</th><th>Q</th></tr></thead><tbody><tr><td>Dipengaruhi oleh daya graviti<br><em>Affected by the force of gravity</em></td><td>Tidak dipengaruhi oleh daya graviti<br><em>Do not affected by the force of gravity</em></td></tr></tbody></table>`,`<table class="opt-table"><thead><tr><th>P</th><th>Q</th></tr></thead><tbody><tr><td>Ada udara<br><em>There is air</em></td><td>Dalam keadaan vakum<br><em>In a vacuum state</em></td></tr></tbody></table>`,`<table class="opt-table"><thead><tr><th>P</th><th>Q</th></tr></thead><tbody><tr><td>Mengalami nyahpecutan<br><em>Experiencing deceleration</em></td><td>Pecutan seragam<br><em>Uniform acceleration</em></td></tr></tbody></table>`], ans:0, exp:"Tiub P adalah dalam keadaan vakum (tiada rintangan udara), semua objek jatuh sama masa tanpa mengira jisim. Tiub Q ada udara dan rintangan udara. | Tube P is in vacuum (no air resistance) so all objects fall simultaneously. Tube Q has air resistance. (P管是真空状态，无空气阻力，所有物体同时下落。Q管有空气阻力。)", src:"Kedah SPM Trial 2025 - Soalan 22" }
+    ],
+
+    // Bab 12: Tenaga Nuklear
+    s_f4_b12: [
+        { q:"23. Antara yang berikut, bahan yang manakah digunakan di dalam reaktor nuklear untuk menjana tenaga elektrik? | Which substance is used in a nuclear reactor to generate electrical energy?", opts:["Kobalt-60 | Cobalt-60","Karbon-14 | Carbon-14","Fosforus-32 | Phosphorus-32","Uranium-235 | Uranium-235"], ans:3, exp:"Uranium-235 digunakan sebagai bahan api dalam reaktor nuklear untuk menghasilkan tenaga melalui pembelahan nukleus (fisi nuklear). | Uranium-235 is the nuclear fuel used in reactors, generating energy through nuclear fission. (铀-235是核反应堆中通过核裂变产生能量的燃料。)", src:"Kedah SPM Trial 2025 - Soalan 23" },
+        { q:"24. Rajah menunjukkan stesen nuklear. Apakah faktor yang perlu diambil kira bagi pembinaan stesen tersebut di Malaysia? | Diagram shows nuclear station. What factor needs to be considered for building it in Malaysia?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">24. Rajah 11 menunjukkan sebuah stesen untuk menjana tenaga elektrik.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 11 shows a station to generate electricity.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_012.png"/><p class="q-img-caption">Rajah 11 / Diagram 11</p><br><br><span style="font-size:15px;font-weight:600">Apakah faktor yang perlu diambil kira bagi pembinaan stesen tersebut di Malaysia?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What factor needs to be considered in operating the station in Malaysia?</em></span>`, opts:["Kos penyelenggaraan yang murah | Low maintenance costs","Sumber uranium-235 yang banyak | Huge source of uranium-235","Kepakaran untuk menguruskan sisa radioaktif | Expertise in managing radioactive waste","Bahan api fosil yang akan habis | Fossil fuels will deplete"], ans:2, exp:"Pengurusan sisa radioaktif memerlukan kepakaran sangat tinggi. Jika tidak diurus dengan betul, boleh menyebabkan bencana alam sekitar yang serius. | Radioactive waste management requires very high expertise; improper handling can cause serious environmental disasters. (放射性废料管理需要极高专业技术，处理不当会引发严重的环境灾难。)", src:"Kedah SPM Trial 2025 - Soalan 24" }
+    ],
+
+    // ===================== FORM 5 =====================
+
+    // Bab 1: Mikroorganisma
+    s_f5_b1: [
+        { q:"25. Apakah suhu yang digunakan dalam autoklaf untuk membunuh mikroorganisma? | What is the temperature used in autoclave to kill microorganisms?", opts:["37 °C","60 °C","100 °C","130 °C"], ans:3, exp:"Autoklaf menggunakan wap air bertekanan tinggi pada suhu 121°C hingga 130°C untuk membunuh semua mikroorganisma termasuk spora. | Autoclave uses high-pressure steam at 121-130°C to kill all microorganisms including spores. (高压灭菌器使用121-130°C的高压蒸汽，可杀死包括芽孢在内的所有微生物。)", src:"Kedah SPM Trial 2025 - Soalan 25" },
+        { q:"26. Larutan X dihasilkan daripada proses penapaian sisa buah-buahan dan sayur-sayuran. Apakah kelebihan larutan X tersebut? | Solution X produced by fermentation of fruit/vegetable waste. What is the advantage of solution X?", opts:["Menghasilkan buih yang banyak | Produces lots of foam","Mempunyai bahan peluntur | Has bleaching agent","Tidak perlu disiental | No need to scrub","Proses penghasilan adalah cepat | The production process is fast"], ans:2, exp:"Larutan X ialah Eko-enzim. Kelebihannya sebagai bahan pencuci ialah tidak perlu disiental kerana mengandungi enzim yang memecahkan kotoran secara biologi. | Solution X is Eco-enzyme. Its advantage as a cleaner is no scrubbing needed because enzymes biologically break down dirt. (X溶液是环保酵素，其优点是无需刷洗，因为酶能生物降解污垢。)", src:"Kedah SPM Trial 2025 - Soalan 26" },
+        { q:"29. Rajah menunjukkan produk makanan Yogurt. Kaedah yang manakah digunakan untuk menghasilkan yogurt? | Diagram shows Yoghurt. Which method is used to make yoghurt?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">29. Rajah 13 menunjukkan suatu produk makanan.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 13 shows a food product.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_013.png"/><p class="q-img-caption">Rajah 13 / Diagram 13</p><br><br><span style="font-size:15px;font-weight:600">Antara yang berikut, kaedah yang manakah digunakan untuk menghasilkan produk makanan tersebut?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Which of the following methods is used to make the food product?</em></span>`, opts:["Memasak | Cooking","Penapaian | Fermentation","Pempasteuran | Pasteurisation","Penyejukbekuan | Freezing"], ans:1, exp:"Yogurt dihasilkan melalui penapaian susu oleh bakteria asid laktik (Lactobacillus). | Yoghurt is produced by fermentation of milk by lactic acid bacteria (Lactobacillus). (酸奶是通过乳酸菌对牛奶进行发酵制成的。)", src:"Kedah SPM Trial 2025 - Soalan 29" }
+    ],
+
+    // Bab 2: Nutrisi dan Teknologi Makanan
+    s_f5_b2: [
+        { q:"20. Antara yang berikut, makanan yang manakah mengandungi lutein? | Which of the following foods contain lutein? (A=Lobak merah/Carrot, B=Betik/Papaya, C=Brokoli/Broccoli, D=Kacang tanah/Peanut)", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">20. Antara yang berikut, makanan yang manakah mengandungi lutein?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Which of the following foods contain lutein?</em></span>`, htmlOpts:[`<img style="max-width:180px;max-height:130px;object-fit:contain" src="imgs/img_014.png"/><br><span style="font-size:13px">Lobak merah / Carrot</span>`,`<img style="max-width:180px;max-height:130px;object-fit:contain" src="imgs/img_015.png"/><br><span style="font-size:13px">Betik / Papaya</span>`,`<img style="max-width:180px;max-height:130px;object-fit:contain" src="imgs/img_016.png"/><br><span style="font-size:13px">Brokoli / Broccoli</span>`,`<img style="max-width:180px;max-height:130px;object-fit:contain" src="imgs/img_017.png"/><br><span style="font-size:13px">Kacang tanah / Peanut</span>`], opts:["Lobak merah","Betik","Brokoli","Kacang tanah"], ans:2, exp:"Lutein adalah pigmen karotenoid yang banyak terdapat dalam sayuran hijau seperti brokoli. Ia penting untuk kesihatan mata. | Lutein is a carotenoid pigment found abundantly in green vegetables like broccoli, important for eye health. (叶黄素是一种类胡萝卜素，大量存在于西兰花等深绿色蔬菜中，对眼睛健康很重要。)", src:"Kedah SPM Trial 2025 - Soalan 20" },
+        { q:"27. Data untuk menganggar nilai kalori kacang tanah: Jisim kacang tanah=1g, Jisim air=10g, Perubahan suhu=20°C. Formula: (4.2 J/g°C × jisim air × perubahan suhu) / jisim kacang. Berapakah nilai kalori? | Data: groundnut mass=1g, water mass=10g, temp change=20°C. What is the calorific value?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">27. Jadual 2 menunjukkan maklumat untuk menganggarkan nilai kalori kacang tanah.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Table 2 shows the informations to estimate the calorific value of a groundnut.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_018.png"/><p class="q-img-caption">Jadual 2 / Table 2</p><br><span style="font-size:15px;font-weight:600">Berapakah nilai kalori kacang tanah tersebut?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What is the calorific value of the groundnut?</em></span>`, opts:["2.1 J/g","42.0 J/g","84.0 J/g","840.0 J/g"], ans:3, exp:"Nilai kalori = (4.2 × 10 × 20) / 1 = 840.0 / 1 = 840.0 J/g. | Calorific value = (4.2 × 10 × 20) / 1 = 840.0 J/g. (热值 = (4.2 × 10 × 20) / 1 = 840.0 J/g。)", src:"Kedah SPM Trial 2025 - Soalan 27" }
+    ],
+
+    // Bab 3: Kelestarian Alam Sekitar
+    s_f5_b3: [
+        { q:"28. Rajah menunjukkan proses dalam kitar nitrogen: Gas nitrogen di udara → P → Ion nitrat. Apakah P? | Nitrogen cycle: Nitrogen gas in air → P → Nitrate ions. What is P?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">28. Rajah 12 menunjukkan suatu proses yang berlaku dalam kitar nitrogen.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 12 shows a process happens in the nitrogen cycle.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_019.png"/><p class="q-img-caption">Rajah 12 / Diagram 12</p><br><br><span style="font-size:15px;font-weight:600">Apakah P? / What is P?<br><em style="font-size:13px;font-weight:400;color:var(--muted)"></em></span>`, opts:["Kilat | Lightning","Protein haiwan | Animal proteins","Sebatian ammonium | Ammonium compounds","Bakteria pendenitratan | Denitrifying bacteria"], ans:0, exp:"Kilat menghasilkan tenaga yang cukup untuk mengoksidakan N2 menjadi NO2, yang kemudian larut dalam hujan membentuk asid nitrik dan akhirnya ion nitrat dalam tanah. | Lightning provides enough energy to oxidise N2 into NO2, which dissolves in rain to form nitric acid, then nitrate ions in soil. (闪电产生足够能量将N2氧化为NO2，溶于雨水形成硝酸，最终在土壤中形成硝酸根离子。)", src:"Kedah SPM Trial 2025 - Soalan 28" },
+        { q:"30. Masa untuk warna larutan metilena biru luntur: Sampel air P=90 minit, Sampel air Q=30 minit. Apakah langkah untuk memastikan sampel Q mencapai masa yang sama seperti P? | Methylene blue decolourise time: Sample P=90 min, Sample Q=30 min. What step to ensure Q reaches same time as P?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">30. Jadual 3 menunjukkan keputusan satu eksperimen untuk mengkaji tahap pencemaran air di dua kawasan.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Table 3 shows the results of an experiment to study the level of water pollution in two areas.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_020.png"/><p class="q-img-caption">Jadual 3 / Table 3</p><br><span style="font-size:15px;font-weight:600">Apakah langkah yang perlu diambil untuk memastikan sampel air Q mencapai masa seperti sampel air P?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What step should be taken to ensure that water sample Q reaches the time as water sample P?</em></span>`, opts:["Pelihara ikan gapi di dalam air | Keep guppy fish in water","Guna kaedah kawalan biologi | Use biological control method","Masukkan bebola lumpur ke dalam air | Put mud balls into water","Masukkan larutan ekoenzim ke dalam air | Put eco-enzyme solution into water"], ans:3, exp:"Masa lebih pendek (30 min) bermakna Sampel Q lebih tercemar. Menambah eko-enzim membantu menguraikan bahan organik dan meningkatkan kualiti air Q, memanjangkan masa luntur hingga sama dengan P. | Shorter time (30 min) means Q is more polluted. Adding eco-enzyme helps decompose organic matter, improving water quality of Q to match P. (时间越短说明污染越重。加入环保酵素有助分解有机物，改善Q样品水质，使其褪色时间与P相同。)", src:"Kedah SPM Trial 2025 - Soalan 30" }
+    ],
+
+    // Bab 4: Kadar Tindak Balas
+    s_f5_b4: [
+        { q:"31. Graf menunjukkan 100 cm3 gas hidrogen dihasilkan dalam masa 20 saat bagi tindak balas Mg dengan HCl pekat. Hitung kadar tindak balas purata. | Graph shows 100 cm3 H2 produced in 20 seconds for Mg + concentrated HCl. Calculate average rate of reaction.", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">31. Rajah 14 menunjukkan graf isi padu gas hidrogen melawan masa bagi tindak balas antara magnesium dengan asid hidroklorik berlainan kepekatan.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 14 shows graph of the volume of hydrogen gas against time for the reaction between magnesium and hydrochloric acid of different concentrations.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_021.png"/><p class="q-img-caption">Rajah 14 / Diagram 14</p><br><span style="font-size:15px;font-weight:600">Hitung kadar tindak balas purata bagi tindak balas antara magnesium dengan asid hidroklorik pekat.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Calculate the average rate of reaction for the reaction between magnesium and concentrated hydrochloric acid.</em></span>`, opts:["5.0 cm3/s","2.5 cm3/s","0.4 cm3/s","0.2 cm3/s"], ans:0, exp:"Kadar tindak balas purata = Jumlah isi padu gas / Masa = 100 cm3 / 20 s = 5.0 cm3/s. | Average rate = Total volume / Time = 100 / 20 = 5.0 cm3/s. (平均反应速率 = 气体总体积 / 时间 = 100 / 20 = 5.0 cm3/s。)", src:"Kedah SPM Trial 2025 - Soalan 31" },
+        { q:"32. Antara yang berikut, kaedah yang manakah dapat meningkatkan kadar tindak balas? | Which of the following methods will increase the rate of reaction?", opts:["Merendam cili di dalam cuka | Soak chillies in vinegar","Melarutkan gula di dalam air panas | Dissolve sugar in hot water","Menyimpan makanan di dalam peti sejuk | Store food in refrigerator","Menambahkan air ke dalam sabun pencuci pinggan | Add water into dishwashing soap"], ans:1, exp:"Melarutkan gula dalam air panas meningkatkan kadar tindak balas kerana suhu tinggi meningkatkan tenaga kinetik molekul dan kekerapan perlanggaran berkesan. | Hot water increases molecular kinetic energy and frequency of effective collisions, increasing reaction rate. (热水增加分子动能和有效碰撞频率，提高反应速率。)", src:"Kedah SPM Trial 2025 - Soalan 32" }
+    ],
+
+    // Bab 5: Sebatian Karbon
+    s_f5_b5: [
+        { q:"33. Antara yang berikut, yang manakah merupakan sebatian hidrokarbon? | Which of the following is a hydrocarbon compound?", opts:["Petroleum | Petroleum","Natrium klorida | Sodium chloride","Minyak kelapa sawit | Palm oil","Gas karbon dioksida | Carbon dioxide gas"], ans:0, exp:"Hidrokarbon adalah sebatian organik yang hanya mengandungi unsur Karbon (C) dan Hidrogen (H). Petroleum adalah campuran pelbagai sebatian hidrokarbon. | Hydrocarbons contain only Carbon (C) and Hydrogen (H). Petroleum is a mixture of various hydrocarbons. (碳氢化合物只含碳(C)和氢(H)。石油是各种碳氢化合物的混合物。)", src:"Kedah SPM Trial 2025 - Soalan 33" },
+        { q:"34. Urutan proses pengekstrakan minyak sawit: Pensterilan > Penanggalan > Pencernaan > Pengekstrakan > Penurasan > X. Apakah kesan jika proses X tidak dilakukan? | Palm oil extraction: Sterilisation > Threshing > Digestion > Extraction > Filtration > X. Effect if X is not done?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">34. Rajah 15 menunjukkan urutan bagi proses pengekstrakan minyak sawit.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 15 shows the sequence of palm oil extraction process.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_022.png"/><p class="q-img-caption">Rajah 15 / Diagram 15</p><br><br><span style="font-size:15px;font-weight:600">Apakah kesan jika proses X tidak dilakukan?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What is the effect if process X is not carried out?</em></span>`, opts:["Minyak sawit tidak berbau | Palm oil is odourless","Minyak sawit menjadi masam | Palm oil becomes sour","Warna minyak sawit menjadi jernih | Colour of palm oil becomes clear","Sabut tidak dapat diasingkan daripada tempurungnya | Pulp cannot be separated from shell"], ans:1, exp:"Proses X ialah Penyulingan/Pemurnian. Tanpanya, asid lemak bebas kekal dalam minyak dan menyebabkan minyak menjadi masam (tengik). | Process X is Purification. Without it, free fatty acids remain in oil causing it to become sour (rancid). (X过程是精炼。不进行的话，游离脂肪酸残留在油中会使油变酸（酸败）。)", src:"Kedah SPM Trial 2025 - Soalan 34" }
+    ],
+
+    // Bab 6: Elektrokimia
+    s_f5_b6: [
+        { q:"35. Antara yang berikut, yang manakah merupakan elektrolit? | Which of the following is an electrolyte?", opts:["Larutan natrium hidroksida | Sodium hydroxide solution","Larutan glukosa | Glucose solution","Naftalena | Naphthalene","Etanol | Ethanol"], ans:0, exp:"Elektrolit ialah bahan yang mengkonduksikan elektrik dalam keadaan akueus atau lebur dengan menghasilkan ion. Larutan NaOH mengandungi ion Na+ dan OH-. | An electrolyte conducts electricity in aqueous or molten state by producing ions. NaOH solution contains Na+ and OH- ions. (电解质是在水溶液或熔融状态下通过产生离子来导电的物质。NaOH溶液含有Na+和OH-离子。)", src:"Kedah SPM Trial 2025 - Soalan 35" },
+        { q:"36. Rajah menunjukkan Sel K (Magnesium-Kuprum) dan Sel L (Kuprum-Zink). Yang manakah benar mengenai bacaan voltmeter bagi sel K dan sel L? | Diagram shows Cell K (Mg-Cu) and Cell L (Cu-Zn). Which is correct about voltmeter readings for Cell K and Cell L?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">36. Rajah 16 menunjukkan dua sel kimia ringkas.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 16 shows two simple chemical cells.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_023.png"/><p class="q-img-caption">Rajah 16 / Diagram 16</p><br><br><span style="font-size:15px;font-weight:600">Antara yang berikut, yang manakah benar mengenai bacaan voltmeter bagi sel K dan sel L?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Which of the following are correct about the voltmeter reading of cell K and cell L?</em></span>`, opts:["Sel K=2.72 V, Sel L=1.10 V | Cell K=2.72 V, Cell L=1.10 V","Sel K=2.38 V, Sel L=2.38 V | Cell K=2.38 V, Cell L=2.38 V","Sel K=1.62 V, Sel L=2.04 V | Cell K=1.62 V, Cell L=2.04 V","Sel K=0.42 V, Sel L=2.04 V | Cell K=0.42 V, Cell L=2.04 V"], ans:0, exp:"Sel K (Mg-Cu): Mg dan Cu sangat jauh dalam siri elektrokimia, menghasilkan voltan tinggi (~2.72 V). Sel L (Cu-Zn): perbezaan lebih kecil (~1.10 V). | Cell K (Mg-Cu): large electrochemical series difference gives higher voltage (~2.72 V). Cell L (Cu-Zn): smaller difference (~1.10 V). (K电池(Mg-Cu)电化学系列差值大，电压高(~2.72V)。L电池(Cu-Zn)差值小(~1.10V)。)", src:"Kedah SPM Trial 2025 - Soalan 36" }
+    ],
+
+    // Bab 7: Cahaya dan Optik
+    s_f5_b7: [
+        { q:"37. Rajah menunjukkan kanta pembesar (magnifying glass). Apakah ciri imej yang terbentuk oleh kanta pembesar tersebut? | Diagram shows a magnifying glass. What is the characteristic of the image formed?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">37. Rajah 17 menunjukkan satu contoh peralatan optik.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 17 shows an example of optical instrument.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_024.png"/><p class="q-img-caption">Rajah 17 / Diagram 17</p><br><br><span style="font-size:15px;font-weight:600">Apakah ciri imej yang terbentuk oleh peralatan optik tersebut?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">What is the characteristic of the image formed by the optical instrument?</em></span>`, opts:["Dikecilkan | Diminished","Nyata | Real","Maya | Virtual","Songsang | Inverted"], ans:2, exp:"Kanta pembesar menghasilkan imej Maya (Virtual), Tegak (Upright), dan Dibesarkan (Magnified) apabila objek diletakkan antara kanta dan titik fokus. | Magnifying glass produces Virtual, Upright, and Magnified image when object is placed between lens and focal point. (放大镜在物体位于焦点以内时，产生虚、正、放大的像。)", src:"Kedah SPM Trial 2025 - Soalan 37" },
+        { q:"38. Rajah menunjukkan imej yang terbentuk melalui kanta cembung: imej berada di sebelah kiri kanta (sisi yang sama dengan objek), maya dan dibesarkan. Di manakah kedudukan objek bagi menghasilkan imej tersebut? | Convex lens diagram shows virtual, magnified image on same side as object. Where is the object position?", html:`<span style="font-size:17px;font-weight:600;line-height:1.55">38. Rajah 18 menunjukkan imej yang terhasil apabila sinar cahaya melalui sejenis kanta.<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Diagram 18 shows the image formed when light rays pass through a type of lens.</em></span><img class="q-img" style="max-width:100%;border-radius:10px;margin:12px 0 4px" src="imgs/img_025.png"/><p class="q-img-caption">Rajah 18 / Diagram 18</p><br><br><span style="font-size:15px;font-weight:600">Di manakah kedudukan objek bagi menghasilkan imej dalam Rajah 18?<br><em style="font-size:13px;font-weight:400;color:var(--muted)">Where is the position of the object to produce the image in Diagram 18?</em></span>`, opts:["Pada F | At F","Pada 2F | At 2F","Di antara F dengan 2F | Between F and 2F","Di antara pusat optik dengan F | Between optical centre and F"], ans:3, exp:"Apabila objek diletakkan antara pusat optik dan titik fokus (F), kanta cembung menghasilkan imej maya, tegak, dan dibesarkan di sebelah yang sama dengan objek. | When object is placed between optical centre and F, a convex lens produces a virtual, upright, magnified image on same side as object. (当物体位于光心和焦点之间时，凸透镜产生同侧的虚、正、放大的像。)", src:"Kedah SPM Trial 2025 - Soalan 38" }
+    ],
+
+    // Bab 8: Daya dan Tekanan
+    s_f5_b8: [
+        { q:"39. Antara yang berikut, pernyataan yang manakah benar mengenai Prinsip Bernoulli? | Which of the following statements is true about Bernoulli's Principle?", opts:["Boleh diaplikasikan pada cecair sahaja | Can be applied only to liquids","Tekanan dalam bendalir meningkat apabila halajunya bertambah | Pressure in fluid increases as velocity increases","Apabila halaju bendalir meningkat, tekanan dalam bendalir akan berkurang | As velocity of fluid increases, pressure decreases","Tekanan yang dikenakan ke atas bendalir dalam bekas tertutup dipindahkan sama rata ke semua arah | Pressure on fluid in closed container transferred equally in all directions"], ans:2, exp:"Prinsip Bernoulli: kawasan bendalir dengan halaju tinggi mempunyai tekanan rendah. Ia berlaku untuk semua bendalir (cecair DAN gas). Pilihan D adalah Prinsip Pascal. | Bernoulli: high-velocity fluid has low pressure. Applies to all fluids (liquid AND gas). Option D describes Pascal's Principle. (伯努利原理：高流速区域压力低，适用于所有流体（液体和气体）。D选项是帕斯卡原理。)", src:"Kedah SPM Trial 2025 - Soalan 39" }
+    ],
+
+    // Bab 9: Teknologi Angkasa Lepas
+    s_f5_b9: [
+        { q:"40. Antara yang berikut, jenis orbit yang manakah berada pada satah khatulistiwa? | Which of the following types of orbits is in the equatorial plane?", opts:["Orbit Geopegun | Geostationary Orbit","Orbit Tinggi Bumi | High Earth Orbit","Orbit Geosegerak | Geosynchronous Orbit","Orbit Rendah Bumi | Low Earth Orbit"], ans:0, exp:"Orbit Geopegun (Geostationary Orbit) berada tepat di atas khatulistiwa pada altitud 35,786 km. Satelit dalam orbit ini kelihatan 'pegun' dari Bumi kerana tempoh orbitnya sama dengan tempoh putaran Bumi (24 jam). | Geostationary Orbit is directly above equator at 35,786 km. Satellites appear stationary from Earth as orbital period = Earth's rotation (24 hours). (地球静止轨道位于赤道正上方35786千米处，运行周期与地球自转周期相同（24小时），从地面看静止不动。)", src:"Kedah SPM Trial 2025 - Soalan 40" }
+    ]
+};
+
+let state = {
+    subject:'', level:'', currentChapterId:'',
+    questions:[], qIndex:0, score:0,
+    isDailyQuiz: false,
+    userId:null, accessToken:null, userName:'', userEmail:'',
+    isAdmin: false, isUnlocked: false,
+    sessionCount: 0,
+    wrongBook:[], progress:{},
+    globalDone:0, globalCorrect:0,
+    dailyDone:0, dailyStreak:0, lastDailyDate:'',
+};
+
+let authMode = 'login';
+function switchTab(mode) {
+    authMode = mode;
+    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&mode==='login')||(i===1&&mode==='register')));
+    document.getElementById('name-field').style.display = mode==='register' ? 'flex' : 'none';
+    document.getElementById('auth-submit-btn').textContent = mode==='login' ? 'Log Masuk' : 'Daftar Akaun';
+    document.getElementById('auth-error').style.display = 'none';
+    document.getElementById('auth-success').style.display = 'none';
+}
+function showAuthErr(m) { const e=document.getElementById('auth-error'); e.textContent=m; e.style.display='block'; document.getElementById('auth-success').style.display='none'; }
+function showAuthOk(m)  { const e=document.getElementById('auth-success'); e.textContent=m; e.style.display='block'; document.getElementById('auth-error').style.display='none'; }
+
+async function handleAuth() {
+    const email=document.getElementById('auth-email').value.trim();
+    const pass=document.getElementById('auth-password').value;
+    const name=document.getElementById('auth-name').value.trim();
+    const btn=document.getElementById('auth-submit-btn');
+    if (!email||!pass) { showAuthErr('Sila isi email dan kata laluan.'); return; }
+    if (authMode==='register'&&!name) { showAuthErr('Sila isi nama anda.'); return; }
+    if (pass.length<6) { showAuthErr('Kata laluan sekurang-kurangnya 6 aksara.'); return; }
+    btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+    document.getElementById('auth-error').style.display='none';
+    if (authMode==='login') {
+        const res=await authFetch('/token?grant_type=password',{email,password:pass});
+        if (res.access_token) {
+            state.accessToken=res.access_token; state.userId=res.user.id;
+            state.userEmail=res.user.email; state.userName=res.user.user_metadata?.name||email.split('@')[0];
+            state.isAdmin=(res.user.email===ADMIN_EMAIL);
+            await onLoginSuccess();
+        } else { showAuthErr(res.error_description||'Login gagal. Semak email / kata laluan.'); }
+    } else {
+        const res=await authFetch('/signup',{email,password:pass,data:{name}});
+        if (res.id||res.user) { showAuthOk('Akaun berjaya didaftarkan! Sila log masuk.'); switchTab('login'); }
+        else showAuthErr(res.error_description||res.msg||'Pendaftaran gagal.');
+    }
+    btn.disabled=false; btn.textContent=authMode==='login'?'Log Masuk':'Daftar Akaun';
+}
+
+async function onLoginSuccess() {
+    await loadCloudData();
+    document.getElementById('user-name-display').textContent=state.userName;
+    document.getElementById('global-top-bar').style.display='flex';
+    if (state.isAdmin) document.getElementById('admin-btn').style.display='flex';
+    showScreen('home-screen'); updateHomeStats(); updateWrongBadge(); updateDailyCard(); updateLockBanner();
+    toast('Selamat datang, '+state.userName+'! 🔥');
+}
+
+async function handleLogout() {
+    if (!confirm('Adakah anda pasti mahu log keluar?')) return;
+    await sbFetch('/auth/v1/logout',{method:'POST'});
+    Object.assign(state,{userId:null,accessToken:null,userName:'',userEmail:'',isAdmin:false,isUnlocked:false,sessionCount:0,wrongBook:[],progress:{},globalDone:0,globalCorrect:0,dailyDone:0,dailyStreak:0,lastDailyDate:''});
+    document.getElementById('global-top-bar').style.display='none';
+    showScreen('auth-screen');
+}
+
+async function loadCloudData() {
+    const pr=await sbFetch('/rest/v1/progress?user_id=eq.'+state.userId+'&select=*');
+    if (pr.ok&&Array.isArray(pr.data)) {
+        state.progress={}; state.globalDone=0; state.globalCorrect=0;
+        pr.data.forEach(r=>{state.progress[r.chapter_id]={done:r.done,correct:r.correct}; state.globalDone+=r.done; state.globalCorrect+=r.correct;});
+    }
+    const wr=await sbFetch('/rest/v1/wrong_answers?user_id=eq.'+state.userId+'&select=*&order=created_at.desc');
+    if (wr.ok&&Array.isArray(wr.data)) {
+        state.wrongBook=wr.data.map(r=>({q:r.question_text,opts:r.options,ans:r.answer_index,yourAns:r.your_answer,exp:r.explanation,src:r.source,dbId:r.id}));
+    }
+    const um=await sbFetch('/rest/v1/user_meta?user_id=eq.'+state.userId+'&select=*');
+    if (um.ok&&Array.isArray(um.data)&&um.data.length>0) {
+        const m=um.data[0];
+        state.sessionCount=m.session_count||0; state.isUnlocked=m.is_unlocked||false;
+        state.dailyDone=m.daily_done||0; state.dailyStreak=m.daily_streak||0; state.lastDailyDate=m.last_daily_date||'';
+        const today=new Date().toISOString().slice(0,10);
+        if (state.lastDailyDate!==today) {
+            const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+            if (state.lastDailyDate!==yesterday&&state.lastDailyDate!=='') state.dailyStreak=0;
+            state.dailyDone=0; await saveUserMeta();
+        }
+    } else { await saveUserMeta(); }
+}
+
+async function saveUserMeta() {
+    await sbFetch('/rest/v1/user_meta',{
+        method:'POST', prefer:'resolution=merge-duplicates',
+        body:JSON.stringify({user_id:state.userId,session_count:state.sessionCount,is_unlocked:state.isUnlocked,daily_done:state.dailyDone,daily_streak:state.dailyStreak,last_daily_date:new Date().toISOString().slice(0,10)})
+    });
+}
+async function saveProgress(chapterId,done,correct) {
+    await sbFetch('/rest/v1/progress',{method:'POST',prefer:'resolution=merge-duplicates',body:JSON.stringify({user_id:state.userId,chapter_id:chapterId,done,correct,updated_at:new Date().toISOString()})});
+}
+async function saveWrongAnswer(q,yourAns) {
+    const res=await sbFetch('/rest/v1/wrong_answers',{method:'POST',prefer:'return=representation',body:JSON.stringify({user_id:state.userId,question_text:q.q,options:q.opts,answer_index:q.ans,your_answer:yourAns,explanation:q.exp,source:q.src||''})});
+    return res.ok&&res.data?.[0]?res.data[0].id:null;
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const hide=id==='quiz-screen'||id==='auth-screen';
+    document.getElementById('global-top-bar').style.display=hide?'none':(state.userId?'flex':'none');
+}
+
+function goSubject(subject) {
+    if (!state.isAdmin&&!state.isUnlocked&&state.sessionCount>=FREE_SESSION_LIMIT) { toast('🔒 Akses dikunci. Hubungi guru anda.'); return; }
+    state.subject=subject;
+    document.getElementById('level-title').textContent=APP_DATA[subject].name;
+    showScreen('level-screen');
+}
+
+function showChapters(level) {
+    state.level=level;
+    const data=APP_DATA[state.subject][level];
+    document.getElementById('chapter-title').textContent=data.title;
+    const list=document.getElementById('chapter-list'); list.innerHTML='';
+    if (data.chapters.length===0) { list.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px">Sedang dikemas kini...</div>'; return; }
+    data.chapters.forEach(ch=>{
+        const qCount=countQ(ch.id); const prog=state.progress[ch.id]||null;
+        const card=document.createElement('div');
+        card.className='chapter-card'+(ch.isComp?' comp-chapter':'');
+        let badge='';
+        if (qCount===0) badge='<span class="chapter-badge badge-questions">Soon</span>';
+        else if (ch.isComp) badge=`<span class="chapter-badge badge-comp">${qCount} soalan</span>`;
+        else if (prog&&prog.done>0) { const p=Math.round((prog.correct/prog.done)*100); badge=`<span class="chapter-badge badge-done">${p}% ✓</span>`; }
+        else badge=`<span class="chapter-badge badge-questions">${qCount} soalan</span>`;
+        card.innerHTML=`<div class="chapter-num">${ch.name}</div><div class="chapter-info"><h4>${ch.name}</h4><p>${ch.desc}</p></div>${badge}`;
+        card.onclick=()=>startQuiz(ch.id,qCount);
+        list.appendChild(card);
+    });
+    showScreen('chapter-screen');
+}
+
+function updateLockBanner() {
+    const locked=!state.isAdmin&&!state.isUnlocked&&state.sessionCount>=FREE_SESSION_LIMIT;
+    document.getElementById('lock-banner').style.display=locked?'flex':'none';
+}
+function updateDailyCard() {
+    const pct=Math.min(100,(state.dailyDone/QUIZ_SIZE)*100);
+    document.getElementById('daily-prog-fill').style.width=pct+'%';
+    document.getElementById('daily-prog-text').textContent=`${state.dailyDone} / ${QUIZ_SIZE} soalan hari ini`;
+    document.getElementById('daily-streak-text').textContent=`🔥 ${state.dailyStreak} hari`;
+}
+
+function startDailyQuiz() {
+    if (state.dailyDone>=QUIZ_SIZE) { toast('✅ Daily Quiz hari ini sudah selesai! Jumpa esok 👋'); return; }
+    const allQ=[...getAll('s_f4_'),...getAll('s_f5_')];
+    state.questions=shuffle(allQ).slice(0,QUIZ_SIZE);
+    state.qIndex=0; state.score=0; state.isDailyQuiz=true; state.currentChapterId='daily';
+    showScreen('quiz-screen'); renderQ();
+}
+
+function countQ(id) {
+    if (id==='s_comp_f4') return getAll('s_f4_').length;
+    if (id==='s_comp_f5') return getAll('s_f5_').length;
+    if (id==='s_comp_all') return getAll('s_f4_').length+getAll('s_f5_').length;
+    return (DB[id]||[]).length;
+}
+function getAll(prefix) { let arr=[]; for (const k in DB) if (k.startsWith(prefix)) arr=arr.concat(DB[k]); return arr; }
+function shuffle(arr) { const a=[...arr]; for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function startQuiz(id,count) {
+    if (count===0) { toast('Soalan sedang dikemas kini 😊'); return; }
+    if (!state.isAdmin&&!state.isUnlocked&&state.sessionCount>=FREE_SESSION_LIMIT) { toast('🔒 Akses dikunci. Hubungi guru anda.'); return; }
+    state.currentChapterId=id; state.isDailyQuiz=false;
+    let qs=[];
+    if (id==='s_comp_f4') qs=getAll('s_f4_');
+    else if (id==='s_comp_f5') qs=getAll('s_f5_');
+    else if (id==='s_comp_all') qs=[...getAll('s_f4_'),...getAll('s_f5_')];
+    else qs=DB[id]||[];
+    state.questions=shuffle(qs).slice(0,QUIZ_SIZE);
+    state.qIndex=0; state.score=0;
+    state.sessionCount++; saveUserMeta(); updateLockBanner();
+    showScreen('quiz-screen'); renderQ();
+}
+
+function renderQ() {
+    const q=state.questions[state.qIndex],total=state.questions.length;
+    document.getElementById('quiz-meta').textContent=`${state.qIndex+1} / ${total}`;
+    document.getElementById('prog-fill').style.width=`${(state.qIndex/total)*100}%`;
+    document.getElementById('feedback-panel').style.display='none';
+    const qt=document.getElementById('q-text');
+    qt.innerHTML=q.html?q.html:fmtText(q.q);
+    if (q.src) { document.getElementById('q-source-text').textContent=q.src; document.getElementById('q-source').style.display='flex'; }
+    else document.getElementById('q-source').style.display='none';
+    const grid=document.getElementById('options-grid'); grid.innerHTML='';
+    const labels=['A','B','C','D'], optList=q.htmlOpts||q.opts, isHtml=!!q.htmlOpts;
+    optList.forEach((opt,i)=>{
+        const btn=document.createElement('button'); btn.className='option-btn';
+        btn.innerHTML=`<div class="option-lbl">${labels[i]}</div><div class="option-content">${isHtml?opt:fmtText(opt)}</div>`;
+        btn.onclick=()=>pick(i,btn,q); grid.appendChild(btn);
+    });
+    document.getElementById('quiz-screen').scrollTop=0;
+}
+
+async function pick(idx,btn,q) {
+    document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+    const correct=idx===q.ans;
+    if (correct) { btn.classList.add('correct'); state.score++; state.globalCorrect++; }
+    else {
+        btn.classList.add('wrong'); document.querySelectorAll('.option-btn')[q.ans].classList.add('correct');
+        const alreadyIn=state.wrongBook.some(w=>w.q===q.q);
+        if (!alreadyIn) { const dbId=await saveWrongAnswer(q,idx); state.wrongBook.unshift({q:q.q,opts:q.opts,ans:q.ans,exp:q.exp,src:q.src,yourAns:idx,dbId}); }
+    }
+    state.globalDone++;
+    if (state.currentChapterId&&state.currentChapterId!=='daily') {
+        const pid=state.currentChapterId;
+        if (!state.progress[pid]) state.progress[pid]={done:0,correct:0};
+        state.progress[pid].done++; if (correct) state.progress[pid].correct++;
+        saveProgress(pid,state.progress[pid].done,state.progress[pid].correct);
+    }
+    updateHomeStats(); updateWrongBadge();
+    const fbInner=document.getElementById('feedback-inner'), fbTitle=document.getElementById('fb-title');
+    fbInner.className='feedback-inner '+(correct?'is-correct':'is-wrong');
+    fbTitle.className='feedback-title '+(correct?'correct':'wrong');
+    fbTitle.innerHTML=correct?'<i class="fa-solid fa-circle-check"></i> Betul! 答对了！':'<i class="fa-solid fa-circle-xmark"></i> Salah! 答错了';
+    document.getElementById('fb-body').innerHTML=fmtText(q.exp||'');
+    document.getElementById('next-btn').textContent=state.qIndex===state.questions.length-1?'Lihat Keputusan →':'Soalan Seterusnya →';
+    document.getElementById('feedback-panel').style.display='block';
+    setTimeout(()=>document.getElementById('feedback-panel').scrollIntoView({behavior:'smooth',block:'end'}),80);
+}
+
+function nextQ() {
+    state.qIndex++;
+    if (state.qIndex<state.questions.length) { renderQ(); document.getElementById('quiz-screen').scrollTop=0; }
+    else showResult();
+}
+
+async function showResult() {
+    const total=state.questions.length, pct=Math.round((state.score/total)*100);
+    const dailyBadge=document.getElementById('daily-complete-badge'); dailyBadge.style.display='none';
+    if (state.isDailyQuiz) {
+        state.dailyDone=Math.min(QUIZ_SIZE,state.dailyDone+total);
+        if (state.dailyDone>=QUIZ_SIZE) { state.dailyStreak++; dailyBadge.style.display='block'; toast('🔥 Daily Quiz selesai! Streak: '+state.dailyStreak+' hari!'); }
+        await saveUserMeta(); updateDailyCard();
+    }
+    showScreen('result-screen');
+    setTimeout(()=>{ document.getElementById('ring-fg').style.strokeDashoffset=396-(396*pct/100); },100);
+    document.getElementById('ring-pct').textContent=pct+'%';
+    document.getElementById('result-detail').textContent=`Betul ${state.score} / ${total} soalan`;
+    const msgs=['Cuba lagi! Jangan putus asa! 💪','Latih lagi untuk hasil lebih baik 📖','Tidak teruk! Teruskan! 👍','Bagus! Hampir sempurna! 🎉','Sempurna! 100%! 🏆'];
+    document.getElementById('result-msg').textContent=msgs[Math.min(4,Math.floor(pct/20))];
+}
+
+function retryQuiz() { if (state.isDailyQuiz) startDailyQuiz(); else startQuiz(state.currentChapterId,state.questions.length); }
+function quitQuiz() { if (confirm('Adakah anda pasti mahu keluar?')) showScreen(state.isDailyQuiz?'home-screen':'chapter-screen'); }
+
+function showWrong() {
+    const list=document.getElementById('wrong-list'); list.innerHTML='';
+    if (state.wrongBook.length===0) {
+        list.innerHTML='<div style="text-align:center;color:var(--muted);padding:60px 40px"><div style="font-size:48px;margin-bottom:12px">🎉</div><p>Tiada soalan salah lagi!<br><small>太棒了！暂无错题</small></p></div>';
+    } else {
+        const labels=['A','B','C','D'];
+        state.wrongBook.forEach(item=>{
+            const div=document.createElement('div'); div.className='wrong-card';
+            const qMain=item.q.split('|')[0].trim();
+            div.innerHTML=`<div class="wrong-card-q">${qMain}</div>
+                <div class="wrong-card-row"><span class="wrong-pill pill-wrong">Anda pilih: ${labels[item.yourAns]}</span><span class="wrong-pill pill-correct">Betul: ${labels[item.ans]}</span></div>
+                <div class="wrong-card-exp">${item.exp?item.exp.split('|')[0].trim():''}</div>
+                ${item.src?`<div class="wrong-source">📎 ${item.src}`:''}`;
+            list.appendChild(div);
+        });
+        const cb=document.createElement('button'); cb.className='clear-btn';
+        cb.innerHTML='<i class="fa-solid fa-trash"></i>  Kosongkan Buku Salah';
+        cb.onclick=async()=>{ if (!confirm('Padam semua?')) return; await sbFetch('/rest/v1/wrong_answers?user_id=eq.'+state.userId,{method:'DELETE'}); state.wrongBook=[]; updateHomeStats(); showWrong(); toast('Dikosongkan!'); };
+        list.appendChild(cb);
+    }
+    showScreen('wrong-screen');
+}
+
+function showProgress() {
+    const list=document.getElementById('progress-list'); list.innerHTML='';
+    const sb=document.createElement('div'); sb.className='streak-banner';
+    sb.innerHTML=`<div class="streak-fire">🔥</div><div class="streak-info"><h3>${state.dailyStreak} Hari Berturut-turut</h3><p>Daily Quiz streak anda</p></div><div class="streak-done"><div class="val">${state.dailyDone}/${QUIZ_SIZE}</div><div class="lbl">Hari ini</div></div>`;
+    list.appendChild(sb);
+    ['science','maths'].forEach(subj=>{
+        const subjData=APP_DATA[subj];
+        const h=document.createElement('div'); h.className='prog-subject-header'; h.textContent=subjData.name; list.appendChild(h);
+        ['f4','f5'].forEach(lv=>{
+            subjData[lv].chapters.forEach(ch=>{
+                const p=state.progress[ch.id]; const pct=p&&p.done>0?Math.round((p.correct/p.done)*100):0;
+                const row=document.createElement('div'); row.className='prog-row';
+                row.innerHTML=`<div class="prog-row-info"><h4>${ch.name} — ${ch.desc.substring(0,28)}${ch.desc.length>28?'…':''}</h4><p>${p?`${p.done} soalan dijawab`:'Belum bermula'}</p></div><div class="prog-mini-bar"><div class="prog-mini-fill" style="width:${pct}%"></div></div><div class="prog-pct">${p?pct+'%':'—'}</div>`;
+                list.appendChild(row);
+            });
+        });
+    });
+    showScreen('progress-screen');
+}
+
+async function showAdmin() {
+    if (!state.isAdmin) { toast('Akses ditolak.'); return; }
+    showScreen('admin-screen');
+    document.getElementById('admin-user-list').innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)"><span class="spinner"></span></div>';
+    const res=await sbFetch('/rest/v1/user_meta?select=*&order=session_count.desc');
+    if (!res.ok||!Array.isArray(res.data)) { document.getElementById('admin-user-list').innerHTML='<div style="color:var(--error);padding:20px">Gagal memuatkan data.</div>'; return; }
+    const users=res.data;
+    const lockedUsers=users.filter(u=>!u.is_unlocked&&u.session_count>=FREE_SESSION_LIMIT).length;
+    document.getElementById('admin-stats-strip').innerHTML=`
+        <div class="admin-stat-card"><div class="val">${users.length}</div><div class="lbl">Jumlah Pelajar</div></div>
+        <div class="admin-stat-card"><div class="val" style="color:var(--error)">${lockedUsers}</div><div class="lbl">Perlu Dibuka</div></div>
+        <div class="admin-stat-card"><div class="val">${users.reduce((s,u)=>s+u.session_count,0)}</div><div class="lbl">Jumlah Sesi</div></div>
+        <div class="admin-stat-card"><div class="val" style="color:var(--amber)">${Math.round(users.reduce((s,u)=>s+u.daily_streak,0)/Math.max(1,users.length))}</div><div class="lbl">Avg Streak</div></div>`;
+    const list=document.getElementById('admin-user-list'); list.innerHTML='';
+    if (users.length===0) { list.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px">Tiada pelajar lagi.</div>'; return; }
+    users.forEach(u=>{
+        const locked=!u.is_unlocked&&u.session_count>=FREE_SESSION_LIMIT;
+        const card=document.createElement('div'); card.className='admin-user-card';
+        card.innerHTML=`<div class="admin-user-top">
+            <div class="admin-user-avatar">${(u.user_name||'?')[0].toUpperCase()}</div>
+            <div class="admin-user-info"><h4>${u.user_name||'Pelajar'}</h4><p>Sesi: ${u.session_count} · Streak: ${u.daily_streak}hari · Daily: ${u.daily_done}/${QUIZ_SIZE}</p></div>
+            ${locked?`<button class="unlock-btn" onclick="unlockUser('${u.user_id}',this)">🔓 Buka</button>`:'<span class="locked-tag" style="background:var(--success-dim);border-color:var(--success);color:var(--success)">✅ OK</span>'}
+        </div>`;
+        list.appendChild(card);
+    });
+}
+
+async function unlockUser(userId,btn) {
+    btn.disabled=true; btn.textContent='...';
+    const res=await sbFetch('/rest/v1/user_meta?user_id=eq.'+userId,{method:'PATCH',prefer:'return=representation',body:JSON.stringify({is_unlocked:true})});
+    if (res.ok) { btn.outerHTML='<span class="locked-tag" style="background:var(--success-dim);border-color:var(--success);color:var(--success)">✅ Dibuka</span>'; toast('Pelajar berjaya dibuka kunci!'); }
+    else { btn.disabled=false; btn.textContent='🔓 Buka'; toast('Gagal. Cuba lagi.'); }
+}
+
+function fmtText(text) {
+    if (!text) return '';
+    const parts=text.split('|');
+    if (parts.length>1) return `${parts[0].trim()} <span class="bi-lang">${parts[1].trim()}</span>`;
+    return text;
+}
+function toast(msg) {
+    const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
+    document.getElementById('toast-container').appendChild(el);
+    setTimeout(()=>el.remove(),3000);
+}
+function updateHomeStats() {
+    const done=state.globalDone, acc=done>0?Math.round((state.globalCorrect/done)*100)+'%':'—';
+    document.getElementById('stat-done').textContent=done;
+    document.getElementById('stat-acc').textContent=acc;
+    document.getElementById('stat-wrong').textContent=state.wrongBook.length;
+}
+function updateWrongBadge() {
+    const badge=document.getElementById('wrong-badge'), n=state.wrongBook.length;
+    badge.textContent=n>99?'99+':n; badge.style.display=n>0?'flex':'none';
+}
+
+</script>
+</body>
+</html>
